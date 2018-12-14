@@ -25,6 +25,8 @@ $ make
 ```
 This will execute all of the fancy cmake procedure and give you all of the executables required for use. Note: you must be in the `build/` directory to run the executables.
 
+Once all of this is done the first thing to do is go into the file `Figure.hh` in the plotting directory and change the variable `OutputFilePath` to your desired directory. I recomend the output folder you just made.
+
 ### Issues and Development
 
 Want to contribute? Awesome!
