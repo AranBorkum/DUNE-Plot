@@ -14,13 +14,18 @@ $ cd /where/you/want/the/files/to/be/
 $ git clone https://github.com/AranBorkum/DUNE-Plot.git
 ```
 DUNE-plot is designed to use cmake so you will need this to be able to compile the module. This can be found [here](https://cmake.org/download/) if you don't have cmake installed already.
-In order to initialise the module navigate to the `/build` directory which has been left empty and execute the following commands:
+In order to initialise the module you will need a  `build/` directory. An output directory is also required such that plots can  be storred somewhere. Execute the following:
 
 ```sh
+$ mkdir build
+$ mkdir output
+$ cd build/
 $ cmake ../duneplot
 $ make
 ```
-This will execute all of the fancy cmake procedure and give you all of the executables required for use. Note: you must be in the `/build` directory to run the executables.
+This will execute all of the fancy cmake procedure and give you all of the executables required for use. Note: you must be in the `build/` directory to run the executables.
+
+Once all of this is done the first thing to do is go into the file `Figure.hh` in the plotting directory and change the variable `OutputFilePath` to your desired directory. I recomend the output folder you just made.
 
 ### Issues and Development
 
