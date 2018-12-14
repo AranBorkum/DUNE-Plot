@@ -84,7 +84,7 @@ void EventDisplay(std::string InputFileName, std::string InputTreeName, std::str
     }
   
     for (auto const& it: CutOffProfile) {
-      FigureProfile(CutOff, it.second, 1, 0).MakePlot();
+      FigureProfile(CutOff, it.second, 1, 1).MakePlot();
     }
   
   }

@@ -52,7 +52,7 @@ public:
   void MakePlot() {
     
     //INITIATE THE CANVAS
-    TCanvas *canvas_main = new TCanvas("canvas_main", "canvas_main");
+    TCanvas *canvas_main = new TCanvas("canvas_main", "canvas_main", 800, 600);
     canvas_main->Print( (fVariable->GetVariableName() + ".pdf[").c_str() );
     
     //INITIATING THE SUBPLOTS
@@ -87,10 +87,10 @@ public:
     //SETTING THE AXIS LABELS AND FEATURES
     fHistogram->SetStats(kFALSE);
     fHistogram->SetLabelSize(0);
-    fHistogram->SetLineColor(kBlue);
-    fHistogram->SetFillColor(kBlue);
+    fHistogram->SetLineColor(fVariable->GetColor());
+    fHistogram->SetFillColor(fVariable->GetColor());
     fHistogram->GetYaxis()->SetTitle("Events");
-    fHistogram->GetYaxis()->SetTitleSize(0.06);
+    fHistogram->GetYaxis()->SetTitleSize(0.04);
     fHistogram->GetYaxis()->SetLabelSize(0.04);
     std::vector<float> limits = fVariable->GetLimits();
     if (limits[0] != -1 && limits[1] != -1) { fHistogram->GetYaxis()->SetRangeUser(limits[0], limits[1]); }
@@ -189,8 +189,8 @@ public:
     //SETTING THE AXIS LABELS AND FEATURES
     fProfile->SetStats(kFALSE);
     fProfile->SetLabelSize(0);
-    fProfile->SetLineColor(kBlue);
-    fProfile->SetFillColor(kBlue);
+    fProfile->SetLineColor(fVariable->GetColor());
+//    fProfile->SetFillColor(fVariable->GetColor());
     fProfile->GetYaxis()->SetTitle("Events");
     fProfile->GetYaxis()->SetTitleSize(0.06);
     fProfile->GetYaxis()->SetLabelSize(0.04);
@@ -231,5 +231,106 @@ public:
   
 };
 
+class FigureHist2D {
+  
+private:
+  int fSetLogY = 0;
+  int fSetLogX = 0;
+  Variable* fVariable;
+  TH2D* fHistogram2D;
+  
+public:
+  //CONSTRUCTOR
+  FigureHist2D (Variable* cVariable, TH2D* cHistogram2D, int cSetLogY, int cSetLogX)
+  {
+    fVariable    = cVariable;
+    fHistogram2D = cHistogram2D;
+    fSetLogY     = cSetLogY;
+    fSetLogX     = cSetLogX;
+  };
+  
+  //DESTRUCTOR
+  ~FigureHist2D() {};
+  
+  //ACTUALLY MAKING THE PLOT
+  void MakePlot() {
+    
+    //INITIATE THE CANVAS
+    TCanvas *canvas_main = new TCanvas("canvas_main", "canvas_main");
+    canvas_main->Print( (fVariable->GetVariableName() + ".pdf[").c_str() );
+    
+    //INITIATING THE SUBPLOTS
+    TPad *canvas1 = new TPad("canvas1", "canvas1", 0.00, 0.30, 1.00, 1.00);
+    canvas1->SetBottomMargin(0.02);
+    canvas1->Draw();
+    canvas_main->cd();
+    
+    if (fSetLogY == 1) {canvas1->SetLogy();}
+    if (fSetLogX == 1) {canvas1->SetLogx();}
+    
+    TPad *canvas2 = new TPad("canvas2", "canvas2", 0.00, 0.00, 1.00, 0.30);
+    canvas2->SetTopMargin   (0.00);
+    canvas2->SetBottomMargin(0.40);
+    canvas2->Draw();
+    canvas2->cd();
+    canvas1->cd();
+    
+    //WRITING LABEL ON THE CANVAS
+    TLatex *l1 = new TLatex(0.15, 0.80, "DUNE");
+    TLatex *l2 = new TLatex(0.15, 0.75, (fVariable->GetVariableName()).c_str());
+    l1->SetNDC(); l1->SetTextFont(72); l1->SetTextSize(0.08);
+    l2->SetNDC(); l2->SetTextFont(72); l2->SetTextSize(0.04);
+    
+    //INITIALISE THE LEGEND
+    TLegend *legend = new TLegend(0.6, 0.8, 0.88, 0.90);
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+    legend->SetLineColor(0);
+    legend->SetTextSize(0.04);
+    
+    //SETTING THE AXIS LABELS AND FEATURES
+    fHistogram2D->SetStats(kFALSE);
+    fHistogram2D->SetLabelSize(0);
+    fHistogram2D->SetLineColor(fVariable->GetColor());
+    //    fProfile->SetFillColor(fVariable->GetColor());
+    fHistogram2D->GetYaxis()->SetTitle("Events");
+    fHistogram2D->GetYaxis()->SetTitleSize(0.06);
+    fHistogram2D->GetYaxis()->SetLabelSize(0.04);
+    std::vector<float> limits = fVariable->GetLimits();
+    if (limits[0] != -1 && limits[1] != -1) { fHistogram2D->GetYaxis()->SetRangeUser(limits[0], limits[1]); }
+    
+    fHistogram2D->Draw();
+    
+    //FINAL DRAWING THE FIGURE
+    legend->AddEntry(fHistogram2D, (fVariable->GetVariableName()).c_str(), "f");
+    legend->Draw();
+    l1->Draw();
+    l2->Draw();
+    
+    //FORMATTING THE BOTTOM CANVAS
+    canvas2->cd();
+    Double_t x[2] = {fHistogram2D->GetXaxis()->GetXmin(), fHistogram2D->GetXaxis()->GetXmax()};
+    Double_t y[2] = {0, 0};
+    
+    TGraph *graph = new TGraph(2, x, y);
+    graph->SetTitle("");
+    graph->SetMinimum(-3);
+    graph->SetMaximum( 3);
+    graph->GetXaxis()->SetLimits(x[0], x[1]);
+    graph->GetXaxis()->SetTitleSize(0.12);
+    graph->GetXaxis()->SetLabelSize(0.10);
+    graph->GetXaxis()->SetTitle((fVariable->GetVariableLabel() + " [" +
+                                 fVariable->GetVariableUnits() + "]").c_str());
+    
+    graph->Draw();
+    graph->GetYaxis()->SetNdivisions(505);
+    
+    //SAVING THE FIGURE
+    canvas_main->Print( (fVariable->GetVariableName() + ".pdf").c_str() );
+    canvas_main->Print( (fVariable->GetVariableName() + ".pdf]").c_str() );
+    system( ("mv " + fVariable->GetVariableName() + ".pdf " + OutputFilePath).c_str() );
+  }
+  
+};
 
 #endif

@@ -11,6 +11,7 @@ private:
   std::string fVariableName;
   std::string fVariableUnits;
   std::string fVariableLabel;
+  short fColor = 2;
   
   std::vector<float>       fBinning;
   std::vector<float>       fLimits = {-1, -1, -1, -1};
@@ -66,6 +67,7 @@ public:
   std::string        GetVariableName () { return fVariableName;   };
   std::string        GetVariableUnits() { return fVariableUnits;  };
   std::string        GetVariableLabel() { return fVariableLabel;  };
+  short              GetColor        () { return fColor;          };
   std::vector<float> GetBinning      () { return fBinning;        };
   std::vector<float> GetLimits       () { return fLimits;         };
   std::vector<std::string> GetLabels () { return fVariableLabels; };
@@ -75,6 +77,7 @@ public:
   void SetVariableName (std::string str)              { fVariableName   = str; };
   void SetVariableUnits(std::string str)              { fVariableUnits  = str; };
   void SetVariableLabel(std::string str)              { fVariableLabel  = str; };
+  void SetColor        (short       str)              { fColor          = str; };
   void SetBinning      (std::vector<float> vec)       { fBinning        = vec; };
   void SetLimits       (std::vector<float> vec)       { fLimits         = vec; };
   void SetLabels       (std::vector<std::string> vec) { fVariableLabels = vec; };
