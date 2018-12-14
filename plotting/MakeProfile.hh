@@ -1,5 +1,5 @@
-#ifndef MAKEHIST_HH
-#define MAKEHIST_HH
+#ifndef MAKEPROFILE_HH
+#define MAKEPROFILE_HH
 
 #include <iostream>
 #include <cmath>
@@ -25,27 +25,28 @@
 #include "TTree.h"
 
 
-class MakeHist {
+class MakeProfile {
   
 private:
   Variable* fVariable = new Variable();
   
 public:
   //CONSTRUCTOR
-  MakeHist(Variable* cVariable)
+  MakeProfile(Variable* cVariable)
   {
     fVariable = cVariable;
   };
   
   //DESTRUCTOR
-  ~MakeHist() {};
+  ~MakeProfile() {};
   
   //FUNCTION TO READ VARIABLE AND MAKE TH1D
-  TH1D* GenerateHistogram()
+  TProfile* GenerateProfile()
   {
-    std::vector<float> histConfig = fVariable->GetBinning();
-    TH1D *h1 = new TH1D("", "", histConfig[0], histConfig[1], histConfig[2]);
-    return h1;
+    std::vector<float> profileConfig = fVariable->GetBinning();
+    TProfile *p1 = new TProfile("", "", profileConfig[0], profileConfig[1], profileConfig[2]
+                                      , profileConfig[3], profileConfig[4]);
+    return p1;
   }
 };
 

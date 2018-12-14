@@ -13,106 +13,81 @@
 #include "TProfile.h"
 #include "TText.h"
 #include "TLatex.h"
-#include "../plotting/PrettyPlot.hh"
+#include "../plotting/Figure.hh"
+#include "../plotting/MakeProfile.hh"
+#include "../helpers/ArbitraryAnaInputManager.hh"
 
 void EventDisplay(std::string InputFileName, std::string InputTreeName, std::string OutputFileName, int table){
   
   TFile* InFile = new TFile(InputFileName.c_str(),"READ");
-  TTree* Tree = (TTree*)InFile->Get(InputTreeName.c_str());
+  std::map<int, ArbitraryAnaInputManager*> aaim;
+  aaim[0] = new ArbitraryAnaInputManager();
   
-  std::vector<double>   * GenParticleStartX   = NULL;
-  std::vector<double>   * GenParticleStartY   = NULL;
-  std::vector<double>   * GenParticleStartZ   = NULL;
-  std::vector<double>   * GenParticleEndX     = NULL;
-  std::vector<double>   * GenParticleEndY     = NULL;
-  std::vector<double>   * GenParticleEndZ     = NULL;
-  std::vector<int>      * HitSize             = NULL;
-  std::vector<int>      * GenParticlePDG      = NULL;
-  std::vector<int>      * GenParticleID       = NULL;
-  std::vector<int>      * GenParticleMotherID = NULL;
-  std::vector<int>      * ProcessEnding       = NULL;
-  std::vector<float>    * HitChan             = NULL;
-  std::vector<float>    * HitTime             = NULL;
-  std::vector<float>    * HitSADC             = NULL;
-  std::vector<float>    * Hit_X               = NULL;
-  std::vector<float>    * Hit_Y               = NULL;
-  std::vector<float>    * Hit_Z               = NULL;
-  std::vector<double>   * GenParticleEnergy   = NULL;
-  std::vector<double>   * GenParticleStartMom = NULL;
-  std::vector<bool>     * ThisNeutronCapture  = NULL;
-  std::vector<bool>     * ThisNeutronStaysInTheDetector = NULL;
+  aaim[0]->SetInputTree("primtrineutronbackground10/PrimTriNeutron");
   
-  Tree->SetBranchAddress("HitTime"            , &HitTime            );
-  Tree->SetBranchAddress("HitChan"            , &HitChan            );
-  Tree->SetBranchAddress("HitSADC"            , &HitSADC            );
-  Tree->SetBranchAddress("HitSize"            , &HitSize            );
-  Tree->SetBranchAddress("Hit_X"              , &Hit_X              );
-  Tree->SetBranchAddress("Hit_Y"              , &Hit_Y              );
-  Tree->SetBranchAddress("Hit_Z"              , &Hit_Z              );
-  Tree->SetBranchAddress("GenParticlePDG"     , &GenParticlePDG     );
-  Tree->SetBranchAddress("GenParticleID"      , &GenParticleID      );
-  Tree->SetBranchAddress("GenParticleMotherID", &GenParticleMotherID);
-  Tree->SetBranchAddress("GenParticleEnergy"  , &GenParticleEnergy  );
-  Tree->SetBranchAddress("GenParticleStartMom", &GenParticleStartMom);
-  Tree->SetBranchAddress("GenParticleStartX"  , &GenParticleStartX  );
-  Tree->SetBranchAddress("GenParticleStartY"  , &GenParticleStartY  );
-  Tree->SetBranchAddress("GenParticleStartZ"  , &GenParticleStartZ  );
-  Tree->SetBranchAddress("GenParticleEndX"    , &GenParticleEndX    );
-  Tree->SetBranchAddress("GenParticleEndY"    , &GenParticleEndY    );
-  Tree->SetBranchAddress("GenParticleEndZ"    , &GenParticleEndZ    );
-  Tree->SetBranchAddress("ProcessEnding"      , &ProcessEnding      );
-  Tree->SetBranchAddress("ThisNeutronCapture" , &ThisNeutronCapture );
-  Tree->SetBranchAddress("ThisNeutronStaysInTheDetector", &ThisNeutronStaysInTheDetector);
-
-  TProfile *cutoff   = new TProfile("", "", 10000, 10e-8, 10e-3, 100, 100000);
-  TH1D     *KE       = new TH1D("", "", 100, 0, 0.05);
-  
-  
-  for (int i=0; i<Tree->GetEntries(); ++i){
-    //  for (int i=0; i<1; ++i){
-    
-    
-    Tree->GetEntry(i);
-    
-    std::vector<GenParticle*> vec_GenParticles;
-    std::vector<Hit*>         vec_Hits;
-    
-    vec_GenParticles.clear();
-    vec_Hits.clear();
-    
-    for (int j=0; j<GenParticlePDG->size(); ++j) {
-      GenParticle* part = new GenParticle((*GenParticlePDG)[j]               ,
-                                          (*GenParticleID)[j]                ,
-                                          (*GenParticleMotherID)[j]          ,
-                                          (*ProcessEnding)[j]                ,
-                                          (*GenParticleEnergy)[j]            ,
-                                          (*ThisNeutronStaysInTheDetector)[i],
-                                          (*ThisNeutronCapture)[i]           );
-      vec_GenParticles.push_back(part);
-    }
-    
-    double Momentum      = (*GenParticleStartMom)[0]*1000;
-    double MassEnergy    = 939.565;
-    double KineticEnergy = TMath::Sqrt(Momentum*Momentum + MassEnergy*MassEnergy) - MassEnergy;
-    
-    double displacement  = 0;
-    
-    for (int it=0; it<GenParticleStartX->size(); ++it) {
-      if ((*GenParticlePDG)[it] == 2112) {
-        displacement +=
-        TMath::Sqrt( ((*GenParticleEndX)[it]-(*GenParticleStartX)[it])*((*GenParticleEndX)[it]-(*GenParticleStartX)[it]) +
-                     ((*GenParticleEndY)[it]-(*GenParticleStartY)[it])*((*GenParticleEndY)[it]-(*GenParticleStartY)[it]) +
-                     ((*GenParticleEndZ)[it]-(*GenParticleStartZ)[it])*((*GenParticleEndZ)[it]-(*GenParticleStartZ)[it])) ;
-      }
-    }
-    
-    cutoff->Fill(KineticEnergy, displacement, 1);
-    KE->Fill(KineticEnergy);
+  for (auto& it: aaim) {
+    it.second->SetInputFile(InputFileName);
+    it.second->LoadTree();
   }
   
-  PrettyProfile *p = new PrettyProfile("c1", "KEvsDisp", cutoff, "KE [MeV]", "#Delta x [nm]", 0, 1);
-  p->MakePlot();
+  Variable *CutOff = new Variable("GEANTCutOff", {"MeV", "nm"}, {"KE", "disp"},
+                                  {10000, 10e-8, 10e-3, 100, 100000});
+
+  std::map<int, TProfile*> CutOffProfile;
   
+  for (auto const& it: aaim) {
+    int fNEvent = -1;
+    int adc_threshold = it.first;
+    ArbitraryAnaInputManager* im = it.second;
+    
+    if (fNEvent == -1) { fNEvent = im->GetEntries(); }
+    
+    CutOffProfile[adc_threshold] = MakeProfile(CutOff).GenerateProfile();
+  
+    for (int i=0; i<fNEvent; ++i){
+    
+      im->GetEntry(i);
+    
+      std::vector<GenParticle*> vec_GenParticles;
+      std::vector<Hit*>         vec_Hits;
+    
+      vec_GenParticles.clear();
+      vec_Hits.clear();
+    
+      for (int j=0; j<im->GenParticlePDG->size(); ++j) {
+	GenParticle* part = new GenParticle((*im->GenParticlePDG)[j]               ,
+					    (*im->GenParticleID)[j]                ,
+					    (*im->GenParticleMotherID)[j]          ,
+					    (*im->ProcessEnding)[j]                ,
+					    (*im->GenParticleEnergy)[j]            ,
+					    (*im->ThisNeutronStaysInTheDetector)[i],
+					    (*im->ThisNeutronCapture)[i]           );
+	vec_GenParticles.push_back(part);
+      }
+    
+      double Momentum      = (*im->GenParticleStartMom)[0]*1000;
+      double MassEnergy    = 939.565;
+      double KineticEnergy = TMath::Sqrt(Momentum*Momentum + MassEnergy*MassEnergy) - MassEnergy;
+    
+      double displacement  = 0;
+    
+      for (int it=0; it<im->GenParticleStartX->size(); ++it) {
+	if ((*im->GenParticlePDG)[it] == 2112) {
+	  displacement +=
+	    TMath::Sqrt( ((*im->GenParticleEndX)[it]-(*im->GenParticleStartX)[it])*((*im->GenParticleEndX)[it]-(*im->GenParticleStartX)[it]) +
+			 ((*im->GenParticleEndY)[it]-(*im->GenParticleStartY)[it])*((*im->GenParticleEndY)[it]-(*im->GenParticleStartY)[it]) +
+			 ((*im->GenParticleEndZ)[it]-(*im->GenParticleStartZ)[it])*((*im->GenParticleEndZ)[it]-(*im->GenParticleStartZ)[it])) ;
+	}
+      }
+    
+      CutOffProfile[adc_threshold]->Fill(KineticEnergy, displacement, 1);
+    }
+  
+    for (auto const& it: CutOffProfile) {
+      FigureProfile(CutOff, it.second, 1, 0).MakePlot();
+    }
+  
+  }
 }
 
 void PrintUsage(){
@@ -122,42 +97,41 @@ void PrintUsage(){
 }
 
 int main(int argc, char** argv){
-  
+
   std::vector<std::string> prims = {"primtrineutronbackground10",
-    "primtrineutronbackground15",
-    "primtrineutronbackground20",
-    "primtrineutronbackground25",
-    "primtrineutronbackground30"};
-  
+            "primtrineutronbackground15",
+            "primtrineutronbackground20",
+            "primtrineutronbackground25",
+            "primtrineutronbackground30"};
+
   int opt;
   extern char *optarg;
   extern int optopt;
-  
-  std::string InputFileName  = "/Users/aranborkum/Docterate/Scripts/DUNE-Plot/RootFiles/10keV_neutron.root";
+  std::string InputFileName  = "/Users/aranborkum/Docterate/Data Files/Neutron FIles/10keV_neutron.root";
   std::string OutputFileName = "Output_1.pdf";
   std::string InputTreeName  = "primtrineutronbackground10/PrimTriNeutron";
-  
+
   while ( (opt = getopt(argc, argv, "i:o:t:")) != -1 ) {  // for each option...
     switch ( opt ) {
-      case 'i':
-        InputFileName = optarg;
-        break;
-      case 'o':
-        OutputFileName = optarg;
-        break;
-      case 't':
-        InputTreeName = optarg;
-        break;
-      case '?':  // unknown option...
-        std::cerr << "Unknown option: '" << char(optopt) << "'!" << std::endl;
-        PrintUsage();
-        break;
+    case 'i':
+      InputFileName = optarg;
+      break;
+    case 'o':
+      OutputFileName = optarg;
+      break;
+    case 't':
+      InputTreeName = optarg;
+      break;
+    case '?':  // unknown option...
+      std::cerr << "Unknown option: '" << char(optopt) << "'!" << std::endl;
+      PrintUsage();
+      break;
     }
   }
-  
+
   if (InputTreeName != "" && InputFileName != "" && OutputFileName != ""){
     EventDisplay(InputFileName, InputTreeName, OutputFileName, 0);
   }
-  
+
   return 0;
 }

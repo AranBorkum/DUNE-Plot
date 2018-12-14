@@ -16,6 +16,7 @@ public:
   std::vector<int>      * GenParticleMotherID          ;
   std::vector<int>      * ProcessEnding                ;
   std::vector<double>   * GenParticleEnergy            ;
+  std::vector<double>   * GenParticleStartMom          ;
   std::vector<bool>     * ThisNeutronStaysInTheDetector;
   std::vector<bool>     * ThisNeutronCapture           ;
   
@@ -51,6 +52,7 @@ public:
   GenParticleMotherID          (NULL),
   ProcessEnding                (NULL),
   GenParticleEnergy            (NULL),
+  GenParticleStartMom          (NULL),
   ThisNeutronStaysInTheDetector(NULL),
   ThisNeutronCapture           (NULL),
 
@@ -75,6 +77,7 @@ public:
     delete GenParticleMotherID          ; GenParticleMotherID           = NULL;
     delete ProcessEnding                ; ProcessEnding                 = NULL;
     delete GenParticleEnergy            ; GenParticleEnergy             = NULL;
+    delete GenParticleStartMom          ; GenParticleStartMom           = NULL;
     delete ThisNeutronStaysInTheDetector; ThisNeutronStaysInTheDetector = NULL;
     delete ThisNeutronCapture           ; ThisNeutronCapture            = NULL;
     
@@ -107,6 +110,7 @@ public:
     t_Input->SetBranchAddress("GenParticleMotherID"          , &GenParticleMotherID          );
     t_Input->SetBranchAddress("ProcessEnding"                , &ProcessEnding                );
     t_Input->SetBranchAddress("GenParticleEnergy"            , &GenParticleEnergy            );
+    t_Input->SetBranchAddress("GenParticleStartMom"          , &GenParticleStartMom          );
     t_Input->SetBranchAddress("ThisNeutronStaysInTheDetector", &ThisNeutronStaysInTheDetector);
     t_Input->SetBranchAddress("ThisNeutronCapture"           , &ThisNeutronCapture           );
     
