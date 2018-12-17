@@ -10,6 +10,7 @@
 #include "../configs/Hit.hh"
 #include "../configs/Variable.hh"
 #include "TCanvas.h"
+#include "TEfficiency.h"
 #include "TFile.h"
 #include "TGraph.h"
 #include "TH1D.h"
@@ -324,6 +325,71 @@ public:
     
     graph->Draw();
     graph->GetYaxis()->SetNdivisions(505);
+    
+    //SAVING THE FIGURE
+    canvas_main->Print( (fVariable->GetVariableName() + ".pdf").c_str() );
+    canvas_main->Print( (fVariable->GetVariableName() + ".pdf]").c_str() );
+    system( ("mv " + fVariable->GetVariableName() + ".pdf " + OutputFilePath).c_str() );
+  }
+  
+};
+
+class FigureEfficiency {
+  
+private:
+  int fSetLogY = 0;
+  int fSetLogX = 0;
+  Variable*    fVariable;
+  TEfficiency* fEfficiency;
+  
+public:
+  //CONSTRUCTOR
+  FigureEfficiency (Variable* cVariable, TEfficiency* cEfficiency, int cSetLogX)
+  {
+    fVariable   = cVariable;
+    fEfficiency = cEfficiency;
+    fSetLogX    = cSetLogX;
+  };
+  
+  //DESTRUCTOR
+  ~FigureEfficiency() {};
+  
+  //ACTUALLY MAKING THE PLOT
+  void MakePlot() {
+    
+    //INITIATE THE CANVAS
+    TCanvas *canvas_main = new TCanvas("canvas_main", "canvas_main");
+    canvas_main->Print( (fVariable->GetVariableName() + ".pdf[").c_str() );
+    
+    //INITIATING THE SUBPLOTS
+    TPad *canvas1 = new TPad("canvas1", "canvas1", 0.00, 0.00, 1.00, 1.00);
+    canvas1->SetBottomMargin(0.00);
+    canvas1->Draw();
+    canvas_main->cd();
+    canvas1->cd();
+    
+    //WRITING LABEL ON THE CANVAS
+    TLatex *l1 = new TLatex(0.15, 0.80, "DUNE");
+    TLatex *l2 = new TLatex(0.15, 0.75, (fVariable->GetVariableName()).c_str());
+    l1->SetNDC(); l1->SetTextFont(72); l1->SetTextSize(0.08);
+    l2->SetNDC(); l2->SetTextFont(72); l2->SetTextSize(0.04);
+    
+    //INITIALISE THE LEGEND
+    TLegend *legend = new TLegend(0.6, 0.8, 0.88, 0.90);
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+    legend->SetLineColor(0);
+    legend->SetTextSize(0.04);
+    
+    //SETTING THE AXIS LABELS AND FEATURES
+    fEfficiency->SetLineColor(fVariable->GetColor());
+    fEfficiency->Draw();
+    
+    //FINAL DRAWING THE FIGURE
+    legend->AddEntry(fEfficiency, (fVariable->GetVariableName()).c_str(), "f");
+    legend->Draw();
+    l1->Draw();
+    l2->Draw();
     
     //SAVING THE FIGURE
     canvas_main->Print( (fVariable->GetVariableName() + ".pdf").c_str() );
